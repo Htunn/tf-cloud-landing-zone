@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyAllActionsWithoutMFA",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:StopInstances",
+        "ec2:TerminateInstances",
+        "rds:DeleteDBInstance",
+        "rds:DeleteDBCluster",
+        "s3:DeleteBucket",
+        "s3:DeleteObject",
+        "s3:DeleteObjectVersion",
+        "dynamodb:DeleteTable",
+        "lambda:DeleteFunction"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "BoolIfExists": {
+          "aws:MultiFactorAuthPresent": "false"
+        }
+      }
+    }
+  ]
+}

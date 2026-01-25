@@ -1,0 +1,37 @@
+# AWS Organization Configuration
+organization_id                = "o-1234567890"      # Replace with your organization ID
+organization_root_id           = "r-abc123"          # Replace with your root OU ID
+organization_master_account_id = "111111111111"     # Replace with management account ID
+
+# Member Account IDs
+security_account_id    = "222222222222"  # Security tooling account
+log_archive_account_id = "333333333333"  # Log archive account
+
+# Naming and Regions
+prefix          = "myorg"
+primary_region  = "us-east-1"
+enabled_regions = ["us-east-1", "us-west-2"]
+
+# Shared Services VPC Configuration
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+public_subnet_cidrs = [
+  "10.0.1.0/24",   # us-east-1a public
+  "10.0.2.0/24",   # us-east-1b public
+  "10.0.3.0/24"    # us-east-1c public
+]
+
+private_subnet_cidrs = [
+  "10.0.11.0/24",  # us-east-1a private
+  "10.0.12.0/24",  # us-east-1b private
+  "10.0.13.0/24"   # us-east-1c private
+]
+
+# Cross-Account Access
+# Accounts that can assume admin role (e.g., security account)
+admin_trusted_accounts = ["222222222222"]
+
+# Billing and Organization
+cost_center   = "Infrastructure"
+business_unit = "Corporate IT"

@@ -1,0 +1,32 @@
+# AWS Account Configuration
+account_id     = "123456789012"  # Replace with your AWS account ID
+prefix         = "mycompany"     # Replace with your organization prefix
+primary_region = "us-east-1"
+enabled_regions = ["us-east-1"]
+environment    = "production"
+
+# VPC Configuration
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+public_subnet_cidrs = [
+  "10.0.1.0/24",   # us-east-1a public
+  "10.0.2.0/24",   # us-east-1b public
+  "10.0.3.0/24"    # us-east-1c public
+]
+
+private_subnet_cidrs = [
+  "10.0.11.0/24",  # us-east-1a private
+  "10.0.12.0/24",  # us-east-1b private
+  "10.0.13.0/24"   # us-east-1c private
+]
+
+# Cross-Account Access (optional)
+# Uncomment and configure if you need cross-account access
+# security_audit_role_trusted_accounts = ["111111111111"]
+# admin_role_trusted_accounts          = ["111111111111"]
+# read_only_role_trusted_accounts      = ["111111111111", "222222222222"]
+
+# Billing and Ownership
+cost_center = "Engineering"
+owner       = "Platform Team"

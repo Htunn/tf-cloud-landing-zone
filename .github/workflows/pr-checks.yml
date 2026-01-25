@@ -1,0 +1,170 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/workflows/pr-checks.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform-fmt:
+    name: Terraform Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Comment PR
+        if: steps.fmt.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Terraform format check failed. Please run `terraform fmt -recursive` to fix formatting issues.'
+            })
+
+      - name: Fail on format issues
+        if: steps.fmt.outcome == 'failure'
+        run: exit 1
+
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - .
+          - modules/networking
+          - modules/iam
+          - modules/security
+          - modules/logging
+          - modules/organization
+          - examples/simple
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend=false
+        working-directory: ${{ matrix.directory }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ matrix.directory }}
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Initialize TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint --recursive --format compact
+
+  terraform-test:
+    name: Terraform Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Run Terraform Tests
+        run: terraform test
+
+  checkov:
+    name: Checkov Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          soft_fail: false
+          output_format: cli
+          download_external_modules: false
+
+  pr-summary:
+    name: PR Summary
+    needs: [terraform-fmt, terraform-validate, tflint, terraform-test, checkov]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              'Format': '${{ needs.terraform-fmt.result }}',
+              'Validate': '${{ needs.terraform-validate.result }}',
+              'TFLint': '${{ needs.tflint.result }}',
+              'Tests': '${{ needs.terraform-test.result }}',
+              'Security': '${{ needs.checkov.result }}'
+            };
+
+            const emoji = (status) => status === 'success' ? '✅' : '❌';
+            const summary = Object.entries(results)
+              .map(([name, status]) => `${emoji(status)} ${name}: ${status}`)
+              .join('\n');
+
+            const allPassed = Object.values(results).every(r => r === 'success');
+            const title = allPassed ? '✅ All Checks Passed' : '❌ Some Checks Failed';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${title}\n\n${summary}`
+            });

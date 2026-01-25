@@ -1,0 +1,8 @@
+# AWS Region
+aws_region = "us-east-1"
+
+# Your AWS Account ID (12 digits)
+account_id = "123456789012"
+
+# Optional: IAM account alias
+# account_alias = "my-company-dev"
