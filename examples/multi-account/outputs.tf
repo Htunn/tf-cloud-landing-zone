@@ -106,9 +106,9 @@ output "organization_landing_zone_summary" {
   description = "Complete summary of organization landing zone"
   value = {
     organization = {
-      id             = var.organization_id
-      root_id        = var.organization_root_id
-      management_id  = var.organization_master_account_id
+      id            = var.organization_id
+      root_id       = var.organization_root_id
+      management_id = var.organization_master_account_id
     }
     organizational_units = {
       count = length(module.landing_zone.organizational_units)

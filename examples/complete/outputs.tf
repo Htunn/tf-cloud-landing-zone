@@ -118,9 +118,9 @@ output "landing_zone_summary" {
       macie        = module.landing_zone.macie_account_id != null ? "enabled" : "disabled"
     }
     logging = {
-      cloudtrail       = module.landing_zone.cloudtrail_name
-      cloudwatch_logs  = module.landing_zone.cloudwatch_log_group_name
-      s3_logging       = module.landing_zone.central_logging_bucket
+      cloudtrail      = module.landing_zone.cloudtrail_name
+      cloudwatch_logs = module.landing_zone.cloudwatch_log_group_name
+      s3_logging      = module.landing_zone.central_logging_bucket
     }
   }
 }

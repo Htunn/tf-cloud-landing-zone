@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.6.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -24,7 +24,7 @@ provider "aws" {
 
   # Use management account credentials
   # For member account resources, use assume_role
-  
+
   default_tags {
     tags = {
       ManagedBy    = "Terraform"
@@ -38,7 +38,7 @@ provider "aws" {
 provider "aws" {
   alias  = "security"
   region = var.primary_region
-  
+
   assume_role {
     role_arn = "arn:aws:iam::${var.security_account_id}:role/OrganizationAccountAccessRole"
   }
@@ -56,7 +56,7 @@ provider "aws" {
 provider "aws" {
   alias  = "logging"
   region = var.primary_region
-  
+
   assume_role {
     role_arn = "arn:aws:iam::${var.log_archive_account_id}:role/OrganizationAccountAccessRole"
   }

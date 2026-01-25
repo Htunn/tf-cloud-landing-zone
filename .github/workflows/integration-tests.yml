@@ -3,18 +3,18 @@ name: Nightly Integration Tests
 on:
   schedule:
     # Run every night at 2 AM UTC
-    - cron: '0 2 * * *'
-  workflow_dispatch:  # Allow manual trigger
+    - cron: "0 2 * * *"
+  workflow_dispatch: # Allow manual trigger
     inputs:
       test_filter:
-        description: 'Test filter pattern (e.g., TestSimple*)'
+        description: "Test filter pattern (e.g., TestSimple*)"
         required: false
-        default: ''
+        default: ""
 
 env:
-  TF_VERSION: '1.6.0'
-  GO_VERSION: '1.21'
-  AWS_REGION: 'us-east-1'
+  TF_VERSION: "1.6.0"
+  GO_VERSION: "1.21"
+  AWS_REGION: "us-east-1"
 
 jobs:
   setup:
@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
-    
+
     permissions:
       id-token: write
       contents: read
@@ -104,12 +104,12 @@ jobs:
         if: always()
         run: |
           echo "Checking for resources that weren't cleaned up..."
-          
+
           # Check for VPCs with our test prefix
           vpcs=$(aws ec2 describe-vpcs \
             --filters "Name=tag:ManagedBy,Values=Terraform" "Name=tag:Example,Values=simple" \
             --query 'Vpcs[*].VpcId' --output text)
-          
+
           if [ -n "$vpcs" ]; then
             echo "⚠️ Warning: Found leftover VPCs: $vpcs"
             echo "leftover_resources=true" >> $GITHUB_OUTPUT
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terratest
     if: always()
-    
+
     permissions:
       id-token: write
       contents: read
@@ -137,13 +137,13 @@ jobs:
       - name: Find and cleanup test resources
         run: |
           echo "Searching for orphaned test resources..."
-          
+
           # Find VPCs older than 2 hours with test tags
           cutoff_time=$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%S)
-          
+
           # This is a safety check - in production, implement more sophisticated cleanup
           echo "Resources older than $cutoff_time will be flagged for review"
-          
+
           # List resources (don't auto-delete to prevent accidents)
           aws ec2 describe-vpcs \
             --filters "Name=tag:ManagedBy,Values=Terraform" \
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [terratest, cleanup]
     if: always()
-    
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -175,7 +175,7 @@ jobs:
           echo "**Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if test artifacts exist
           if [ -d "test-results" ]; then
             echo "### Test Logs" >> $GITHUB_STEP_SUMMARY
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: report
     if: failure()
-    
+
     steps:
       - name: Send failure notification
         run: |
@@ -215,7 +215,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terratest
     if: always()
-    
+
     permissions:
       id-token: write
       contents: read
@@ -231,11 +231,11 @@ jobs:
         run: |
           echo "## 💰 Cost Estimate for Test Run" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Get cost from last 24 hours for test resources
           start_date=$(date -u -d '1 day ago' +%Y-%m-%d)
           end_date=$(date -u +%Y-%m-%d)
-          
+
           echo "Estimated costs from $start_date to $end_date:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- NAT Gateway: ~\$0.05/hour × test duration" >> $GITHUB_STEP_SUMMARY

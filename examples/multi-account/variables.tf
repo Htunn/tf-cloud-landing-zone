@@ -1,7 +1,7 @@
 variable "organization_id" {
   description = "AWS Organization ID"
   type        = string
-  
+
   validation {
     condition     = can(regex("^o-[a-z0-9]{10,32}$", var.organization_id))
     error_message = "Organization ID must be in format o-xxxxxxxxxx."
@@ -11,7 +11,7 @@ variable "organization_id" {
 variable "organization_root_id" {
   description = "AWS Organization root ID"
   type        = string
-  
+
   validation {
     condition     = can(regex("^r-[a-z0-9]{4,32}$", var.organization_root_id))
     error_message = "Organization root ID must be in format r-xxxx."
@@ -21,7 +21,7 @@ variable "organization_root_id" {
 variable "organization_master_account_id" {
   description = "AWS Organization management/master account ID"
   type        = string
-  
+
   validation {
     condition     = can(regex("^[0-9]{12}$", var.organization_master_account_id))
     error_message = "Account ID must be a 12-digit number."
@@ -31,7 +31,7 @@ variable "organization_master_account_id" {
 variable "security_account_id" {
   description = "Security tooling account ID (delegated administrator)"
   type        = string
-  
+
   validation {
     condition     = can(regex("^[0-9]{12}$", var.security_account_id))
     error_message = "Account ID must be a 12-digit number."
@@ -41,7 +41,7 @@ variable "security_account_id" {
 variable "log_archive_account_id" {
   description = "Log archive account ID"
   type        = string
-  
+
   validation {
     condition     = can(regex("^[0-9]{12}$", var.log_archive_account_id))
     error_message = "Account ID must be a 12-digit number."
@@ -52,7 +52,7 @@ variable "prefix" {
   description = "Prefix for resource naming"
   type        = string
   default     = "org"
-  
+
   validation {
     condition     = can(regex("^[a-z0-9-]+$", var.prefix))
     error_message = "Prefix must contain only lowercase letters, numbers, and hyphens."
@@ -75,7 +75,7 @@ variable "vpc_cidr" {
   description = "CIDR block for shared services VPC"
   type        = string
   default     = "10.0.0.0/16"
-  
+
   validation {
     condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "VPC CIDR must be a valid IPv4 CIDR block."
