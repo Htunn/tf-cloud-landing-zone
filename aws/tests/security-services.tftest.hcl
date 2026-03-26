@@ -318,7 +318,7 @@ run "enabled_regions_default_is_us_east_1" {
   }
 
   assert {
-    condition     = var.enabled_regions == ["us-east-1"]
+    condition     = var.enabled_regions[0] == "us-east-1" && length(var.enabled_regions) == 1
     error_message = "Default enabled region must be us-east-1"
   }
 }

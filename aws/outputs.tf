@@ -19,12 +19,12 @@ output "account_id" {
 
 output "kms_key_id" {
   description = "KMS key ID for encryption"
-  value       = var.enable_kms_key ? aws_kms_key.main[0].key_id : null
+  value       = module.kms.kms_key_id
 }
 
 output "kms_key_arn" {
   description = "KMS key ARN for encryption"
-  value       = var.enable_kms_key ? aws_kms_key.main[0].arn : null
+  value       = module.kms.kms_key_arn
 }
 
 # ============================================================================
@@ -102,6 +102,52 @@ output "logging" {
 }
 
 # ============================================================================
+# ECR Outputs
+# ============================================================================
+
+output "ecr" {
+  description = "ECR module outputs"
+  value = {
+    repository_urls  = module.ecr.repository_urls
+    repository_arns  = module.ecr.repository_arns
+    repository_names = module.ecr.repository_names
+  }
+}
+
+# ============================================================================
+# Compute Outputs
+# ============================================================================
+
+output "compute" {
+  description = "Compute module outputs"
+  value = {
+    ecs_cluster_arn           = module.compute.ecs_cluster_arn
+    ecs_cluster_name          = module.compute.ecs_cluster_name
+    lambda_execution_role_arn = module.compute.lambda_execution_role_arn
+    lambda_log_group_name     = module.compute.lambda_log_group_name
+    ec2_launch_template_id    = module.compute.ec2_launch_template_id
+    ec2_security_group_id     = module.compute.ec2_security_group_id
+    ec2_asg_name              = module.compute.ec2_asg_name
+  }
+}
+
+# ============================================================================
+# Database Outputs
+# ============================================================================
+
+output "database" {
+  description = "Database module outputs"
+  value = {
+    rds_cluster_endpoint        = module.database.rds_cluster_endpoint
+    rds_cluster_reader_endpoint = module.database.rds_cluster_reader_endpoint
+    rds_cluster_id              = module.database.rds_cluster_id
+    rds_security_group_id       = module.database.rds_security_group_id
+    dynamodb_table_name         = module.database.dynamodb_table_name
+    dynamodb_table_arn          = module.database.dynamodb_table_arn
+  }
+}
+
+# ============================================================================
 # Unified Landing Zone Configuration Output
 # ============================================================================
 
@@ -140,7 +186,18 @@ output "landing_zone_config" {
 
     encryption = {
       kms_key_enabled = var.enable_kms_key
-      kms_key_arn     = var.enable_kms_key ? aws_kms_key.main[0].arn : null
+      kms_key_arn     = module.kms.kms_key_arn
+    }
+
+    compute = {
+      ecs_enabled    = var.enable_ecs
+      lambda_enabled = var.enable_lambda_baseline
+      ec2_enabled    = var.enable_ec2
+    }
+
+    database = {
+      rds_enabled      = var.enable_rds
+      dynamodb_enabled = var.enable_dynamodb
     }
   }
 }

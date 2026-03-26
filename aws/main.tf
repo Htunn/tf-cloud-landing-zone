@@ -46,29 +46,21 @@ check "deployment_mode_requirements" {
 }
 
 # ============================================================================
-# KMS Encryption Key
+# KMS Module
 # ============================================================================
 
-resource "aws_kms_key" "main" {
-  count = var.enable_kms_key ? 1 : 0
+module "kms" {
+  source = "../modules/aws/kms"
 
-  description             = "KMS key for ${local.name_prefix} landing zone encryption"
-  deletion_window_in_days = var.kms_key_deletion_window_in_days
-  enable_key_rotation     = true
+  enable_kms_key                  = var.enable_kms_key
+  kms_key_deletion_window_in_days = var.kms_key_deletion_window_in_days
+  kms_key_alias                   = local.kms_key_alias
+  enable_multi_region             = var.enable_kms_multi_region
+  key_administrators              = var.kms_key_administrators
+  key_users                       = var.kms_key_users
 
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${local.name_prefix}-key"
-    }
-  )
-}
-
-resource "aws_kms_alias" "main" {
-  count = var.enable_kms_key ? 1 : 0
-
-  name          = "alias/${local.kms_key_alias}"
-  target_key_id = aws_kms_key.main[0].key_id
+  prefix = local.name_prefix
+  tags   = local.common_tags
 }
 
 # ============================================================================
@@ -105,7 +97,7 @@ module "networking" {
   enable_transit_gateway = var.enable_transit_gateway && local.is_organization_mode
 
   flow_logs_log_group_name = local.vpc_flow_logs_log_group
-  kms_key_id               = var.enable_kms_key ? aws_kms_key.main[0].arn : null
+  kms_key_id               = module.kms.kms_key_arn
 
   prefix = local.name_prefix
   tags   = local.common_tags
@@ -158,7 +150,7 @@ module "security" {
   # Macie Configuration
   enable_macie = var.enable_macie
 
-  kms_key_id = var.enable_kms_key ? aws_kms_key.main[0].arn : null
+  kms_key_id = module.kms.kms_key_arn
 
   prefix = local.name_prefix
   tags   = local.common_tags
@@ -183,7 +175,98 @@ module "logging" {
   enable_centralized_logging_bucket = var.enable_centralized_logging_bucket
   cloudwatch_log_retention_days     = var.cloudwatch_log_retention_days
 
-  kms_key_id = var.enable_kms_key ? aws_kms_key.main[0].arn : null
+  kms_key_id = module.kms.kms_key_arn
+
+  prefix = local.name_prefix
+  tags   = local.common_tags
+}
+
+# ============================================================================
+# ECR Module
+# ============================================================================
+
+module "ecr" {
+  source = "../modules/aws/ecr"
+
+  repositories                = var.ecr_repositories
+  lifecycle_policy_keep_count = var.ecr_lifecycle_policy_keep_count
+  untagged_image_expiry_days  = var.ecr_untagged_image_expiry_days
+  kms_key_arn                 = module.kms.kms_key_arn
+  enable_cross_account_pull   = var.ecr_enable_cross_account_pull
+  cross_account_ids           = var.ecr_cross_account_ids
+
+  prefix = local.name_prefix
+  tags   = local.common_tags
+}
+
+# ============================================================================
+# Compute Module
+# ============================================================================
+
+module "compute" {
+  source = "../modules/aws/compute"
+
+  enable_ecs                = var.enable_ecs
+  ecs_cluster_name          = var.ecs_cluster_name
+  enable_container_insights = var.enable_container_insights
+
+  enable_lambda_baseline    = var.enable_lambda_baseline
+  lambda_log_retention_days = var.lambda_log_retention_days
+
+  enable_ec2           = var.enable_ec2
+  enable_asg           = var.enable_asg
+  ec2_instance_type    = var.ec2_instance_type
+  ec2_ami_id           = var.ec2_ami_id
+  ec2_min_size         = var.ec2_min_size
+  ec2_max_size         = var.ec2_max_size
+  ec2_desired_capacity = var.ec2_desired_capacity
+
+  vpc_id      = module.networking.vpc_id
+  subnet_ids  = module.networking.private_subnet_ids
+  kms_key_arn = module.kms.kms_key_arn
+
+  prefix = local.name_prefix
+  tags   = local.common_tags
+}
+
+# ============================================================================
+# Database Module
+# ============================================================================
+
+module "database" {
+  source = "../modules/aws/database"
+
+  enable_rds      = var.enable_rds
+  enable_dynamodb = var.enable_dynamodb
+
+  db_engine                   = var.db_engine
+  db_engine_version           = var.db_engine_version
+  db_cluster_identifier       = var.db_cluster_identifier
+  db_name                     = var.db_name
+  db_master_username          = var.db_master_username
+  db_master_password          = var.db_master_password
+  db_instance_class           = var.db_instance_class
+  db_instance_count           = var.db_instance_count
+  db_min_capacity             = var.db_min_capacity
+  db_max_capacity             = var.db_max_capacity
+  enable_deletion_protection  = var.db_enable_deletion_protection
+  skip_final_snapshot         = var.db_skip_final_snapshot
+  backup_retention_period     = var.db_backup_retention_period
+  preferred_backup_window     = var.db_preferred_backup_window
+  enable_performance_insights = var.db_enable_performance_insights
+
+  dynamodb_table_name           = var.dynamodb_table_name
+  dynamodb_billing_mode         = var.dynamodb_billing_mode
+  dynamodb_hash_key             = var.dynamodb_hash_key
+  dynamodb_hash_key_type        = var.dynamodb_hash_key_type
+  dynamodb_range_key            = var.dynamodb_range_key
+  dynamodb_range_key_type       = var.dynamodb_range_key_type
+  enable_point_in_time_recovery = var.dynamodb_enable_point_in_time_recovery
+
+  vpc_id              = module.networking.vpc_id
+  subnet_ids          = module.networking.private_subnet_ids
+  allowed_cidr_blocks = var.db_allowed_cidr_blocks
+  kms_key_arn         = module.kms.kms_key_arn
 
   prefix = local.name_prefix
   tags   = local.common_tags
