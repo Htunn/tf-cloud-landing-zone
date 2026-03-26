@@ -20,7 +20,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/yourusername/tf-cloud-landing-zone.git
+   git clone https://github.com/htunn/tf-cloud-landing-zone.git
    cd tf-cloud-landing-zone
    ```
 

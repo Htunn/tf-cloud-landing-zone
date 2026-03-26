@@ -20,7 +20,7 @@ func TestSimpleExampleSingleAccount(t *testing.T) {
 	// Generate unique identifier for this test run
 	uniqueID := strings.ToLower(random.UniqueId())
 	prefix := fmt.Sprintf("test-%s", uniqueID)
-	
+
 	// Pick a random AWS region to test in
 	awsRegion := aws.GetRandomStableRegion(t, []string{"us-east-1", "us-west-2"}, nil)
 	accountID := aws.GetAccountId(t)
@@ -28,21 +28,21 @@ func TestSimpleExampleSingleAccount(t *testing.T) {
 	// Construct terraform options with default retryable errors
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		// Path to the Terraform code that will be tested
-		TerraformDir: "../examples/simple",
+		TerraformDir: "../examples/aws/simple",
 
 		// Variables to pass to Terraform
 		Vars: map[string]interface{}{
-			"deployment_mode":          "single-account",
-			"account_id":               accountID,
-			"prefix":                   prefix,
-			"enabled_regions":          []string{awsRegion},
-			"vpc_cidr":                 "10.100.0.0/16",
-			"enable_guardduty":         true,
-			"enable_security_hub":      true,
-			"enable_cloudtrail":        true,
-			"enable_config":            true,
-			"enable_nat_gateway":       true,
-			"single_nat_gateway":       true,
+			"deployment_mode":               "single-account",
+			"account_id":                    accountID,
+			"prefix":                        prefix,
+			"enabled_regions":               []string{awsRegion},
+			"vpc_cidr":                      "10.100.0.0/16",
+			"enable_guardduty":              true,
+			"enable_security_hub":           true,
+			"enable_cloudtrail":             true,
+			"enable_config":                 true,
+			"enable_nat_gateway":            true,
+			"single_nat_gateway":            true,
 			"cloudwatch_log_retention_days": 7,
 		},
 
@@ -96,7 +96,7 @@ func testVPCConfiguration(t *testing.T, terraformOptions *terraform.Options, aws
 	// Verify subnets exist
 	publicSubnetIDs := terraform.OutputList(t, terraformOptions, "public_subnet_ids")
 	privateSubnetIDs := terraform.OutputList(t, terraformOptions, "private_subnet_ids")
-	
+
 	assert.GreaterOrEqual(t, len(publicSubnetIDs), 2, "Should have at least 2 public subnets")
 	assert.GreaterOrEqual(t, len(privateSubnetIDs), 2, "Should have at least 2 private subnets")
 

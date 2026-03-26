@@ -190,7 +190,7 @@ Perfect for:
 ### Clone and Deploy
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/tf-cloud-landing-zone
+git clone https://github.com/htunn/tf-cloud-landing-zone
 cd tf-cloud-landing-zone
 
 # Use simple example
@@ -310,7 +310,7 @@ While the module is production-ready, future enhancements could include:
 
 Before publishing to GitHub:
 
-- [ ] Update README.md GitHub links (replace `yourusername`)
+- [ ] Update README.md GitHub links (replace `htunn`)
 - [ ] Test in sandbox AWS account
 - [ ] Configure AWS credentials for CI/CD (`AWS_TEST_ROLE_ARN`)
 - [ ] Set up branch protection rules

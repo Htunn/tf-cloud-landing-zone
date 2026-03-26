@@ -1,4 +1,4 @@
-module github.com/yourusername/tf-cloud-landing-zone/test
+module github.com/htunn/tf-cloud-landing-zone/test
 
 go 1.21
 

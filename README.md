@@ -1,12 +1,15 @@
-# AWS Cloud Landing Zone Terraform Module
+# Multi-Cloud Landing Zone Terraform Module
 
-[![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.6.0-blue.svg)](https://www.terraform.io/)
+[![Terraform](https://img.shields.io/badge/terraform-~%3E1.8-blue.svg)](https://www.terraform.io/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![AWS Provider](https://img.shields.io/badge/AWS%20Provider-%3E%3D5.0-orange.svg)](https://registry.terraform.io/providers/hashicorp/aws/latest)
+[![AWS Provider](https://img.shields.io/badge/AWS%20Provider-6.38.0-orange.svg)](https://registry.terraform.io/providers/hashicorp/aws/latest)
+[![Azure Provider](https://img.shields.io/badge/Azure%20Provider-4.65.0-blue.svg)](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
 
-A production-ready Terraform module for deploying a secure AWS cloud landing zone with comprehensive security baseline, networking, IAM, logging, and monitoring capabilities.
+A production-ready Terraform module for deploying secure cloud landing zones on **AWS** and **Azure** (in progress), with comprehensive security baseline, networking, IAM, logging, and monitoring capabilities.
 
 ## Features
+
+### AWS (Production-Ready)
 
 ✅ **Dual Deployment Modes**: Single-account or AWS Organizations multi-account  
 ✅ **Secure Networking**: VPC with multi-AZ subnets, NAT Gateway, VPC Flow Logs, Transit Gateway  
@@ -19,9 +22,17 @@ A production-ready Terraform module for deploying a secure AWS cloud landing zon
 ✅ **Complete Examples**: Simple, complete, and multi-account configurations  
 ✅ **SCP Library**: Pre-built Service Control Policies for common use cases
 
+### Azure (In Progress)
+🔲 **Networking**: VNet, subnets, NSGs, NAT Gateway, VPN/ExpressRoute  
+🔲 **Security**: Microsoft Defender for Cloud, Sentinel, Azure Key Vault  
+🔲 **Logging**: Log Analytics Workspace, Diagnostic Settings, Activity Log  
+🔲 **IAM**: RBAC roles, Conditional Access, PIM, Managed Identities  
+🔲 **Governance**: Management Groups, Azure Policy, Resource Locks  
+
 ## Architecture
 
-📊 **[View Interactive Diagrams](docs/architecture-diagrams.md)** - Comprehensive flowcharts, sequence diagrams, and component diagrams
+📊 **[AWS Architecture Diagrams](docs/aws/architecture-diagrams.md)** — Flowcharts, sequence diagrams, and component diagrams for AWS  
+📊 **[Azure Architecture Diagrams](docs/azure/architecture-diagrams.md)** — Planned diagrams for Azure
 
 This module supports two deployment architectures:
 
@@ -83,11 +94,11 @@ For AWS Organizations with multiple member accounts.
 
 ## Quick Start
 
-### Single-Account Deployment
+### AWS — Single-Account Deployment
 
 ```hcl
 module "landing_zone" {
-  source = "github.com/yourusername/tf-cloud-landing-zone"
+  source = "github.com/htunn/tf-cloud-landing-zone//aws"
 
   # Deployment mode
   deployment_mode = "single-account"
@@ -113,11 +124,11 @@ module "landing_zone" {
 }
 ```
 
-### Organization Deployment
+### AWS — Organization Deployment
 
 ```hcl
 module "landing_zone" {
-  source = "github.com/yourusername/tf-cloud-landing-zone"
+  source = "github.com/htunn/tf-cloud-landing-zone//aws"
 
   # Deployment mode
   deployment_mode          = "organization"
@@ -171,24 +182,37 @@ module "landing_zone" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.6.0 |
-| aws | >= 5.0, < 6.0 |
+| terraform | ~> 1.8 |
+| aws (AWS module) | ~> 6.0 (locked: 6.38.0) |
+| azurerm (Azure module) | ~> 4.0 (locked: 4.65.0) |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 5.0, < 6.0 |
+| aws | ~> 6.0 |
+| azurerm | ~> 4.0 |
 
 ## Modules
 
+### AWS Modules (`modules/aws/`)
+
 | Name | Source | Description |
 |------|--------|-------------|
-| networking | ./modules/networking | VPC, subnets, routing, Transit Gateway |
-| iam | ./modules/iam | IAM policies, roles, Access Analyzer |
-| security | ./modules/security | GuardDuty, Security Hub, Config, Macie |
-| logging | ./modules/logging | CloudTrail, CloudWatch, S3 logging |
-| organization | ./modules/organization | AWS Organizations, OUs, SCPs |
+| networking | ./modules/aws/networking | VPC, subnets, routing, Transit Gateway |
+| iam | ./modules/aws/iam | IAM policies, roles, Access Analyzer |
+| security | ./modules/aws/security | GuardDuty, Security Hub, Config, Macie |
+| logging | ./modules/aws/logging | CloudTrail, CloudWatch, S3 logging |
+| organization | ./modules/aws/organization | AWS Organizations, OUs, SCPs |
+
+### Azure Modules (`modules/azure/`) — Placeholders
+
+| Name | Source | Description |
+|------|--------|-------------|
+| networking | ./modules/azure/networking | VNet, subnets, NSGs, NAT Gateway |
+| iam | ./modules/azure/iam | RBAC roles, Conditional Access, PIM |
+| security | ./modules/azure/security | Defender for Cloud, Sentinel, Key Vault |
+| logging | ./modules/azure/logging | Log Analytics, Diagnostic Settings |
 
 ## Inputs
 
@@ -222,7 +246,7 @@ module "landing_zone" {
 | enabled_regions | AWS regions to enable | `list(string)` | `["us-east-1"]` | no |
 | tags | Common tags for all resources | `map(string)` | See variables.tf | no |
 
-See [variables.tf](variables.tf) for complete input documentation.
+See [aws/variables.tf](aws/variables.tf) for complete AWS input documentation.
 
 ## Outputs
 
@@ -241,24 +265,32 @@ See [variables.tf](variables.tf) for complete input documentation.
 - `security` - Security service details
 - `logging` - Logging configuration
 
-See [outputs.tf](outputs.tf) for complete output documentation.
+See [aws/outputs.tf](aws/outputs.tf) for complete AWS output documentation.
 
 ## Examples
 
-### Configuration Examples
+### AWS Configuration Examples
 
-- [**Simple**](examples/simple/) - Minimal single-account deployment (~$40/month)
-- [**Complete**](examples/complete/) - Full-featured single-account with all services (~$125/month)
-- [**Multi-Account**](examples/multi-account/) - Organization mode with OUs and SCPs
+- [**Simple**](examples/aws/simple/) — Minimal single-account deployment (~$40/month)
+- [**Complete**](examples/aws/complete/) — Full-featured single-account with all services (~$125/month)
+- [**Multi-Account**](examples/aws/multi-account/) — Organization mode with OUs and SCPs
 
-### Policy Examples
+### Azure Configuration Examples
 
-- [**SCP Library**](docs/scp-examples.md) - Pre-built Service Control Policies with examples for:
+- [**Simple**](examples/azure/simple/) — Placeholder: minimal Azure subscription deployment
+
+### AWS Policy Examples
+
+- [**SCP Library**](docs/aws/scp-examples.md) — Pre-built Service Control Policies for:
   - Geographic restrictions
   - Security baseline enforcement
   - Cost control
   - Data protection
   - Compliance requirements
+
+### Azure Policy Examples
+
+- [**Azure Policies**](docs/azure/policies/README.md) — Planned Azure Policy examples
 
 ## Testing
 
@@ -266,22 +298,40 @@ This module includes comprehensive testing at multiple levels:
 
 ### Terraform Native Unit Tests
 
-Fast unit tests that validate configuration logic without deploying to AWS:
+Fast unit tests that validate configuration logic without deploying to cloud:
 
 ```bash
-# Run all unit tests
+# AWS unit tests (run from aws/)
+cd aws
 terraform init
 terraform test
 
-# Run specific test
+# Run a specific AWS test file
 terraform test -filter=tests/single-account-mode.tftest.hcl
+terraform test -filter=tests/organization-mode.tftest.hcl
+terraform test -filter=tests/networking.tftest.hcl
+terraform test -filter=tests/feature-flags.tftest.hcl
+terraform test -filter=tests/validation.tftest.hcl
+terraform test -filter=tests/iam.tftest.hcl
+terraform test -filter=tests/security-services.tftest.hcl
+terraform test -filter=tests/logging.tftest.hcl
+terraform test -filter=tests/outputs.tftest.hcl
+
+# Azure unit tests (run from azure/)
+cd azure
+terraform init
+terraform test
 ```
 
 Tests validate:
 - Deployment mode requirements
-- Variable validation rules
+- Variable validation rules (account IDs, CIDR blocks, enums, boundary values)
 - Conditional resource logic
 - Output calculations
+- IAM password policy defaults (CIS Benchmark)
+- Security services configuration (GuardDuty, Security Hub, Config, Macie)
+- Logging configuration (CloudTrail, VPC Flow Logs, CloudWatch retention)
+- Composite `landing_zone_config` output structure
 
 ### Terratest Integration Tests
 
@@ -320,7 +370,7 @@ Nightly integration tests run in AWS to catch regressions.
 
 ## Migration Guide
 
-### From Single-Account to Organization Mode
+### AWS: From Single-Account to Organization Mode
 
 1. Create AWS Organization in your management account
 2. Update Terraform configuration:
@@ -331,13 +381,28 @@ deployment_mode = "single-account"
 account_id      = "123456789012"
 
 # After
-deployment_mode    = "organization"
-organization_id    = "o-1234567890"
+deployment_mode      = "organization"
+organization_id      = "o-1234567890"
 organization_root_id = "r-abc123"
 ```
 
-3. Review the plan: `terraform plan`
+3. Review the plan: `terraform plan` (from the `aws/` directory)
 4. Apply changes incrementally if needed
+
+### Multi-Cloud Structure
+
+This repository is structured to support both AWS and Azure landing zones:
+
+```
+aws/               ← AWS landing zone root (terraform init/apply here)
+azure/             ← Azure landing zone root (terraform init/apply here)
+modules/aws/       ← AWS sub-modules
+modules/azure/     ← Azure sub-modules (placeholders)
+examples/aws/      ← AWS usage examples
+examples/azure/    ← Azure usage examples (placeholder)
+docs/aws/          ← AWS architecture docs & SCP policies
+docs/azure/        ← Azure architecture docs & policies (placeholder)
+```
 
 ## Cost Considerations
 
@@ -367,11 +432,12 @@ This module is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for
 
 ## Authors
 
-Maintained by [Your Name/Organization]
+Maintained by [htunn](https://github.com/htunn)
 
 ## Acknowledgments
 
-Based on AWS Well-Architected Framework and security best practices from:
-- AWS Control Tower
-- CIS AWS Foundations Benchmark
-- AWS Security Hub standards
+Based on cloud provider well-architected frameworks and security best practices:
+- AWS Well-Architected Framework / AWS Control Tower
+- CIS AWS Foundations Benchmark / AWS Security Hub standards
+- Azure Cloud Adoption Framework (CAF)
+- Microsoft Defender for Cloud security benchmarks

@@ -275,7 +275,7 @@ The module is ready for:
 
 ### Recommended Before Production Deployment
 
-1. Update README.md GitHub links (replace `yourusername`)
+1. Update README.md GitHub links (replace `htunn`)
 2. Test in a sandbox AWS account
 3. Review and customize:
    - `iam_password_policy` values
@@ -292,7 +292,7 @@ The module is ready for:
 
 ```hcl
 module "landing_zone" {
-  source = "github.com/yourusername/tf-cloud-landing-zone"
+  source = "github.com/htunn/tf-cloud-landing-zone"
 
   deployment_mode = "single-account"
   account_id      = "123456789012"
@@ -316,7 +316,7 @@ module "landing_zone" {
 
 ```hcl
 module "landing_zone" {
-  source = "github.com/yourusername/tf-cloud-landing-zone"
+  source = "github.com/htunn/tf-cloud-landing-zone"
 
   deployment_mode            = "organization"
   organization_id            = "o-1234567890"

@@ -61,3 +61,4 @@ __pycache__/
 
 # Lock files (keep .terraform.lock.hcl in version control)
 # .terraform.lock.hcl is intentionally NOT ignored
+.vscode/*.code-workspace
